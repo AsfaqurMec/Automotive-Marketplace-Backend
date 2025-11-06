@@ -17,6 +17,7 @@
     "noEmitOnError": false,
     "baseUrl": "./src",
     "types": ["node", "express", "multer"],
+    
     "typeRoots": ["./node_modules/@types", "./src/types"],
     "paths": {
       "@/*": ["*"]
