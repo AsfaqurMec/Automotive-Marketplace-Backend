@@ -1,0 +1,18 @@
+import nodemailer from "nodemailer";
+import { EmailOptions } from '../types/common.js';
+declare const transport: nodemailer.Transporter<import("nodemailer/lib/smtp-transport/index.js").SentMessageInfo, import("nodemailer/lib/smtp-transport/index.js").Options>;
+export declare const sendHtmlMail: (options: EmailOptions) => Promise<unknown>;
+export declare const sendTextMail: (options: EmailOptions) => Promise<unknown>;
+export declare const sendNewAccountMail: (options: EmailOptions) => void;
+export declare const sendDealerAccountMail: ({ fullName, email, password, link, lng }: EmailOptions) => Promise<void>;
+export declare const sendPublicEmail: (options: EmailOptions) => Promise<unknown>;
+export declare const sendNewUploadMail: (options: EmailOptions) => void;
+export declare const sendEmailChangeMail: (options: EmailOptions) => void;
+export declare const sendPasswordResetMail: (options: EmailOptions) => Promise<void>;
+export declare const sendEmailVerifcationMail: (options: EmailOptions) => Promise<void>;
+export declare const sendPaymentMethodVerifcationMail: (options: EmailOptions) => void;
+export declare const sendEmailToUploader: (options: EmailOptions) => void;
+export declare const sendEmailNotify: (options: EmailOptions) => Promise<void>;
+export declare const sendCompanyNewsEmail: (options: EmailOptions) => void;
+export declare const sendNewCustomerMail: ({ fullName, email, password, link, lng }: EmailOptions) => Promise<void>;
+export default transport;
