@@ -14,7 +14,9 @@ vehicaleRoute.get("/:slug", vehicaleController.getVehicaleBySlug as (req: Reques
 
 vehicaleRoute.post("/", (req: Request, res: Response, next: NextFunction) => {
     upload.array('media')(req, res, (err) => {
+      
       if (err) {
+        
         if (err.code === 'LIMIT_FILE_SIZE') {
           return res.status(400).json({
             message: `File size exceeds the limit of ${process.env.MAX_FILE_SIZE_MB} MB.`,

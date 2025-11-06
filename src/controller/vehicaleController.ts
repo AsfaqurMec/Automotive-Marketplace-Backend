@@ -218,6 +218,7 @@ const vehicaleController = {
   },
 
   async createVehicale(req: AuthenticatedVehicleRequest, res: Response) {
+    console.log('createVehicale');
     try {
       if (typeof req.body.location === 'string') {
         req.body.location = JSON.parse(req.body.location);
@@ -300,6 +301,7 @@ const vehicaleController = {
       res.status(201).json(savedVehicale);
 
     } catch (error) {
+      console.log('Error in createVehicale:', error);
       if ((error as Error).name === "ValidationError") {
         const validationError = error as { inner?: Array<{ path: string; message: string }> };
         const errors = validationError.inner?.map((e: { path: string; message: string }) => ({
