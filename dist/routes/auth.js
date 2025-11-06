@@ -409,6 +409,8 @@ authRouter.put("/update-user", (req, res, next) => {
             throw UnauthorizedException(req.t("user-not-found"));
         }
         const { name } = req.body;
+        // console.log(name,"name");
+        // console.log(userModel,"userModel");
         if (name)
             userModel.fullName = name;
         if (req.file) {
@@ -426,6 +428,7 @@ authRouter.put("/update-user", (req, res, next) => {
             }
         }
         await userModel.save();
+        // console.log(userModel,"userModel after save");
         res.status(200).json({
             message: req.t("profile-updated"),
             user: userModel,

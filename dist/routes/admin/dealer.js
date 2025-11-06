@@ -42,6 +42,7 @@ dealerRoute.get('/dashboard/summary', async (req, res) => {
 dealerRoute.get('/:id', async (req, res) => {
     try {
         const dealer = await Dealer.findById(req.params.id).populate('carsPosted');
+        //  console.log(dealer);
         if (!dealer)
             return res.status(404).json({ message: 'Dealer not found' });
         res.status(200).json(dealer);

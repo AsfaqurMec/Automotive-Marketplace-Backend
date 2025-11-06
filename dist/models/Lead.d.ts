@@ -6,7 +6,6 @@ declare const _default: mongoose.Model<{
     fullName: string;
     status: "New" | "Contacted" | "Qualified" | "Lost" | "Converted" | "In Progress" | "Closed";
     googleCalendarSyncStatus: "Pending" | "Failed" | "Synced";
-    assignedTo: mongoose.Types.ObjectId[];
     sharedWith: mongoose.Types.ObjectId[];
     emailLogs: mongoose.Types.DocumentArray<{
         status: "Sent" | "Failed";
@@ -39,6 +38,8 @@ declare const _default: mongoose.Model<{
     googleCalendarEventLink?: string | null | undefined;
     googleCalendarAccountEmail?: string | null | undefined;
     trackingInfo?: string | null | undefined;
+    createdBy?: string | null | undefined;
+    assignedTo?: string | null | undefined;
     notes?: string | null | undefined;
 }, {}, {}, {}, mongoose.Document<unknown, {}, {
     email: string;
@@ -47,7 +48,6 @@ declare const _default: mongoose.Model<{
     fullName: string;
     status: "New" | "Contacted" | "Qualified" | "Lost" | "Converted" | "In Progress" | "Closed";
     googleCalendarSyncStatus: "Pending" | "Failed" | "Synced";
-    assignedTo: mongoose.Types.ObjectId[];
     sharedWith: mongoose.Types.ObjectId[];
     emailLogs: mongoose.Types.DocumentArray<{
         status: "Sent" | "Failed";
@@ -80,6 +80,8 @@ declare const _default: mongoose.Model<{
     googleCalendarEventLink?: string | null | undefined;
     googleCalendarAccountEmail?: string | null | undefined;
     trackingInfo?: string | null | undefined;
+    createdBy?: string | null | undefined;
+    assignedTo?: string | null | undefined;
     notes?: string | null | undefined;
 }> & {
     email: string;
@@ -88,7 +90,6 @@ declare const _default: mongoose.Model<{
     fullName: string;
     status: "New" | "Contacted" | "Qualified" | "Lost" | "Converted" | "In Progress" | "Closed";
     googleCalendarSyncStatus: "Pending" | "Failed" | "Synced";
-    assignedTo: mongoose.Types.ObjectId[];
     sharedWith: mongoose.Types.ObjectId[];
     emailLogs: mongoose.Types.DocumentArray<{
         status: "Sent" | "Failed";
@@ -121,6 +122,8 @@ declare const _default: mongoose.Model<{
     googleCalendarEventLink?: string | null | undefined;
     googleCalendarAccountEmail?: string | null | undefined;
     trackingInfo?: string | null | undefined;
+    createdBy?: string | null | undefined;
+    assignedTo?: string | null | undefined;
     notes?: string | null | undefined;
 } & {
     _id: mongoose.Types.ObjectId;
@@ -133,7 +136,6 @@ declare const _default: mongoose.Model<{
     fullName: string;
     status: "New" | "Contacted" | "Qualified" | "Lost" | "Converted" | "In Progress" | "Closed";
     googleCalendarSyncStatus: "Pending" | "Failed" | "Synced";
-    assignedTo: mongoose.Types.ObjectId[];
     sharedWith: mongoose.Types.ObjectId[];
     emailLogs: mongoose.Types.DocumentArray<{
         status: "Sent" | "Failed";
@@ -166,6 +168,8 @@ declare const _default: mongoose.Model<{
     googleCalendarEventLink?: string | null | undefined;
     googleCalendarAccountEmail?: string | null | undefined;
     trackingInfo?: string | null | undefined;
+    createdBy?: string | null | undefined;
+    assignedTo?: string | null | undefined;
     notes?: string | null | undefined;
 }, mongoose.Document<unknown, {}, mongoose.FlatRecord<{
     email: string;
@@ -174,7 +178,6 @@ declare const _default: mongoose.Model<{
     fullName: string;
     status: "New" | "Contacted" | "Qualified" | "Lost" | "Converted" | "In Progress" | "Closed";
     googleCalendarSyncStatus: "Pending" | "Failed" | "Synced";
-    assignedTo: mongoose.Types.ObjectId[];
     sharedWith: mongoose.Types.ObjectId[];
     emailLogs: mongoose.Types.DocumentArray<{
         status: "Sent" | "Failed";
@@ -207,6 +210,8 @@ declare const _default: mongoose.Model<{
     googleCalendarEventLink?: string | null | undefined;
     googleCalendarAccountEmail?: string | null | undefined;
     trackingInfo?: string | null | undefined;
+    createdBy?: string | null | undefined;
+    assignedTo?: string | null | undefined;
     notes?: string | null | undefined;
 }>> & mongoose.FlatRecord<{
     email: string;
@@ -215,7 +220,6 @@ declare const _default: mongoose.Model<{
     fullName: string;
     status: "New" | "Contacted" | "Qualified" | "Lost" | "Converted" | "In Progress" | "Closed";
     googleCalendarSyncStatus: "Pending" | "Failed" | "Synced";
-    assignedTo: mongoose.Types.ObjectId[];
     sharedWith: mongoose.Types.ObjectId[];
     emailLogs: mongoose.Types.DocumentArray<{
         status: "Sent" | "Failed";
@@ -248,6 +252,8 @@ declare const _default: mongoose.Model<{
     googleCalendarEventLink?: string | null | undefined;
     googleCalendarAccountEmail?: string | null | undefined;
     trackingInfo?: string | null | undefined;
+    createdBy?: string | null | undefined;
+    assignedTo?: string | null | undefined;
     notes?: string | null | undefined;
 }> & {
     _id: mongoose.Types.ObjectId;

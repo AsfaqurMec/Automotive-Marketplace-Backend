@@ -2,7 +2,8 @@ import Lead from "../../models/Lead.js";
 import { Router } from "express";
 import { google } from 'googleapis';
 import mongoose from "mongoose";
-import { sendEmailNotify } from "../../services/transport.js";
+import { sendEmailNotify, sendLeadAssignmentMail } from "../../services/transport.js";
+import Dealer from "../../models/Dealer.js";
 import yup from 'yup';
 const leadsRoute = Router();
 leadsRoute.get('/getleads', async (req, res) => {
@@ -343,14 +344,42 @@ const createLeadSchema = yup.object().shape({
     budget: yup.string(),
     reminder: yup.date(),
     task: yup.string(),
-    assignedTo: yup.array().of(yup.string()),
+    //assignedTo: yup.array().of(yup.string()),
+    assignedTo: yup.string(),
     notes: yup.string(),
+    createdBy: yup.string(),
 });
 leadsRoute.post('/create', async (req, res) => {
     try {
         const data = await createLeadSchema.validate(req.body, { abortEarly: false, stripUnknown: true });
         const lead = new Lead(data);
         await lead.save();
+        // Notify assigned dealers (if any)
+        try {
+            const assigned = Array.isArray(lead.assignedTo) ? lead.assignedTo : [];
+            if (assigned.length > 0) {
+                const dealers = await Dealer.find({ _id: { $in: assigned } }).select('fullName companyName email');
+                const link = `${process.env.WEBSITE_LINK}/admin/leads`;
+                await Promise.all(dealers
+                    .filter(d => d.email)
+                    .map(d => sendLeadAssignmentMail({
+                    to: d.email,
+                    dealerName: d.fullName || d.companyName,
+                    lead: {
+                        _id: lead._id,
+                        fullName: lead.fullName,
+                        email: lead.email,
+                        phone: lead.phone,
+                        interestedIn: lead.interestedIn || '',
+                        budget: lead.budget || '',
+                        source: lead.source || undefined,
+                        createdAt: lead.createdAt,
+                    },
+                    link,
+                })));
+            }
+        }
+        catch { }
         res.status(201).json({ success: true, data: lead });
     }
     catch (error) {

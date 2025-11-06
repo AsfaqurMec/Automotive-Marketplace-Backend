@@ -14,5 +14,21 @@ export declare const sendPaymentMethodVerifcationMail: (options: EmailOptions) =
 export declare const sendEmailToUploader: (options: EmailOptions) => void;
 export declare const sendEmailNotify: (options: EmailOptions) => Promise<void>;
 export declare const sendCompanyNewsEmail: (options: EmailOptions) => void;
+export declare const sendLeadAssignmentMail: (options: {
+    to: string;
+    dealerName?: string;
+    lead: {
+        fullName?: string;
+        email?: string;
+        phone?: string;
+        source?: string;
+        interestedIn?: string;
+        budget?: string;
+        createdAt?: Date | string;
+        _id?: unknown;
+    };
+    link?: string;
+    lng?: string;
+}) => Promise<void>;
 export declare const sendNewCustomerMail: ({ fullName, email, password, link, lng }: EmailOptions) => Promise<void>;
 export default transport;

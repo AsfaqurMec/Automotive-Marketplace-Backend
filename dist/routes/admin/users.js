@@ -67,11 +67,14 @@ UsersRoute.get("/dealers", async (req, res) => {
                 ]
             })
         };
-        const customers = await Dealer.find(searchFilter)
+        const customers = (await Dealer.find({
+            ...searchFilter,
+            role: { $ne: null }
+        })
             .sort({ [sortBy]: -1 })
             .skip(skip)
             .limit(limit)
-            .populate("role");
+            .populate("role")).filter(c => c.role !== null);
         const total = await Dealer.countDocuments(searchFilter);
         res.status(200).json({
             success: true,

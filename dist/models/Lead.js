@@ -33,11 +33,13 @@ const leadSchema = new mongoose.Schema({
     },
     googleCalendarAccountEmail: { type: String },
     trackingInfo: { type: String },
-    assignedTo: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Dealer",
-        },
-    ],
+    createdBy: { type: String },
+    // assignedTo: [ {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Dealer",
+    //   },
+    // ],
+    assignedTo: { type: String },
     notes: { type: String },
     sharedWith: [
         {

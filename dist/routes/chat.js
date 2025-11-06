@@ -113,6 +113,7 @@ chatRoute.post('/createChat', async (req, res) => {
 chatRoute.post('/create', async (req, res) => {
     try {
         const { participants, type, createdBy } = req.body;
+        // console.log(participants, type, createdBy);
         // Validate required parameters
         if (!participants || !Array.isArray(participants) || participants.length !== 2) {
             return res.status(400).json({
@@ -243,7 +244,7 @@ chatRoute.post('/create', async (req, res) => {
         });
     }
     catch (error) {
-        // console.error('Error in create chat:', error);
+        console.error('Error in create chat:', error);
         res.status(500).json({
             message: error.message || 'Internal server error'
         });

@@ -1,6 +1,7 @@
 import { Response } from 'express';
 import { VehicleRequest, AuthenticatedVehicleRequest } from '../types/index.js';
 declare const vehicaleController: {
+    getPublicVehicales(req: VehicleRequest, res: Response): Promise<void>;
     getVehicales(req: VehicleRequest, res: Response): Promise<void>;
     getShareVehicales(req: VehicleRequest, res: Response): Promise<void>;
     getVehicaleBySlug(req: VehicleRequest, res: Response): Promise<Response<any, Record<string, any>> | undefined>;

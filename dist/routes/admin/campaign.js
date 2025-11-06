@@ -424,7 +424,7 @@ campaignRouter.get('/dealer/:dealerId/with-stats', async (req, res) => {
         }
         const campaignsFromDb = await Campaign.find({ dealerId: dealerId })
             .sort({ createdAt: -1 });
-      //  console.log(campaignsFromDb);
+        //  console.log(campaignsFromDb);
         if (!campaignsFromDb || campaignsFromDb.length === 0) {
             return res.json({ campaigns: [] });
         }
@@ -502,9 +502,9 @@ campaignRouter.get('/dealer/:dealerId/with-stats', async (req, res) => {
     }
 });
 campaignRouter.post('/exchange-code', async (req, res) => {
-  //  console.log('req.body', req.body);
+    //console.log('req.body',req.body);
     const code = req.body.code.dealerId;
-  //  console.log('code', code);
+    //    console.log('code',code);
     if (!code) {
         return res.status(400).json({ message: 'Authorization code is required.' });
     }
@@ -520,7 +520,7 @@ campaignRouter.post('/exchange-code', async (req, res) => {
         res.json({ accessToken });
     }
     catch (err) {
-       // console.log('error', err);
+        //  console.log('error',err);
         res.status(500).json({ message: 'Failed to exchange authorization code.' });
     }
 });

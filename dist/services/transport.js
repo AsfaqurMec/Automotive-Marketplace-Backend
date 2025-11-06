@@ -356,6 +356,36 @@ export const sendCompanyNewsEmail = (options) => {
         html: baseTemplate(content),
     });
 };
+// Lead assignment notification to dealer
+export const sendLeadAssignmentMail = async (options) => {
+    const lngCode = options.lng || 'en';
+    const detailsRows = [
+        { label: 'Lead Name', value: options.lead.fullName },
+        { label: 'Email', value: options.lead.email },
+        { label: 'Phone', value: options.lead.phone },
+        { label: 'Interested In', value: options.lead.interestedIn },
+        { label: 'Budget', value: options.lead.budget },
+        { label: 'Source', value: options.lead.source },
+        { label: 'Created At', value: options.lead.createdAt ? new Date(options.lead.createdAt).toLocaleString() : undefined },
+    ].filter(r => r.value);
+    const rowsHtml = detailsRows
+        .map(r => `<tr><td style="padding:8px 12px;background:#fafafa;font-weight:600;">${r.label}</td><td style="padding:8px 12px;">${String(r.value)}</td></tr>`)
+        .join('');
+    const leadLink = options.link || `${WEBSITE_LINK}/admin/leads`;
+    const content = `
+    <h2>New Lead Assigned</h2>
+    <p>Hello ${options.dealerName || 'Dealer'},</p>
+    <p>You have been assigned a new lead. Here are the details:</p>
+    <table style="width:100%;border-collapse:collapse;border:1px solid #eee;">${rowsHtml}</table>
+    <a href="${leadLink}" class="button">View Lead</a>
+    <p style="margin-top: 30px;">${i18next.t("goodbye-message", { lng: lngCode })}</p>
+  `;
+    await sendHtmlMail({
+        to: options.to,
+        subject: 'New lead assigned to you',
+        html: baseTemplate(content),
+    });
+};
 export const sendNewCustomerMail = async ({ fullName, email, password, link, lng = 'en' }) => {
     const html = baseTemplate(`
     <h2>${i18next.t('welcome-customer', { lng })}, ${fullName}!</h2>
