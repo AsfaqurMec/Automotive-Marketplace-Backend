@@ -53,6 +53,7 @@ subscriptionRouter.put("/:id", async (req, res) => {
 subscriptionRouter.post("/add-subscription", async (req, res) => {
     try {
         const { userId, subscriptionId } = req.body;
+        console.log(req.body);
         if (!userId || !subscriptionId) {
             return res.status(400).json({ message: "Missing userId or subscriptionId" });
         }
@@ -84,6 +85,7 @@ subscriptionRouter.post("/add-subscription", async (req, res) => {
         }
     }
     catch (error) {
+        console.log(error);
         res.status(500).json({ message: error.message });
     }
 });

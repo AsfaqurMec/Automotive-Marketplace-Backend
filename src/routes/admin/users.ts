@@ -232,6 +232,7 @@ UsersRoute.put('/dealer/:id', async (req, res) => {
 
     res.status(200).json(updatedDealer);
   } catch (err: unknown) { 
+    console.log(err);
     if ((err as { name?: string }).name === 'ValidationError') {
       const errors = (err as { inner?: Array<{ path: string; message: string }> }).inner?.map((e: { path: string; message: string }) => ({ path: e.path, message: e.message })) || [];
       return res.status(400).json({ validationErrors: errors });
