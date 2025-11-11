@@ -26,7 +26,7 @@ import connectDB from './config/db.js';
 config();
 
 // Railway automatically sets process.env.PORT
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || process.env.LOCAL_PORT || 5000;
 
 if (!PORT) {
   console.error('❌ PORT environment variable is not defined');
