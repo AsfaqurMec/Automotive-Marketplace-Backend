@@ -1,5 +1,7 @@
 import { Response } from 'express';
+import mongoose from 'mongoose';
 import Car from "../models/Car.js";
+import CarSell from "../models/CarSell.js";
 import { vehicaleSchema } from "../validations/vehicaleValidation.js";
 // Updated to use Cloudinary instead of Google Cloud Storage
 import uploadFileToGCS, { deleteFileFromGCS } from '../utils/googleCloud.js';
@@ -628,6 +630,174 @@ const vehicaleController = {
       res.status(200).json({ message: "Car deleted successfully" });
     } catch {
       res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
+  async updateVehicleStatus(req: AuthenticatedVehicleRequest, res: Response) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      // Validate status
+      const allowedStatuses = ['Pending', 'Available', 'Discontinued'];
+      if (!allowedStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid status. Allowed values: Pending, Available, Discontinued'
+        });
+      }
+
+      // Find and update vehicle
+      const vehicle = await Car.findByIdAndUpdate(
+        id,
+        { status, updatedAt: new Date() },
+        { new: true, runValidators: true }
+      ).populate('postedBy', 'fullName email');
+
+      if (!vehicle) {
+        return res.status(404).json({
+          success: false,
+          message: 'Vehicle not found'
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Vehicle status updated successfully',
+        data: vehicle
+      });
+    } catch (error) {
+      console.error('Error updating vehicle status:', error);
+      res.status(500).json({
+        success: false,
+        message: (error as Error).message || 'Internal server error'
+      });
+    }
+  },
+
+  async markVehicleAsSold(req: AuthenticatedVehicleRequest, res: Response) {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const { id } = req.params;
+      const { amount, sellerId, dealerID, name, email, contact, country } = req.body;
+
+      // Validation
+      if (!amount || amount <= 0) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: 'Amount is required and must be greater than 0'
+        });
+      }
+
+      if (!name || !email || !contact || !sellerId) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: 'Name, email, contact, and sellerId are required fields'
+        });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid email format'
+        });
+      }
+
+      // Find vehicle
+      const vehicle = await Car.findById(id).session(session);
+      if (!vehicle) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(404).json({
+          success: false,
+          message: 'Vehicle not found'
+        });
+      }
+
+      // Check if vehicle is already sold
+      if (vehicle.status === 'Sold') {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: 'Vehicle is already marked as sold'
+        });
+      }
+
+      // Validate seller exists
+      const seller = await Dealer.findById(sellerId).session(session);
+      if (!seller) {
+        await session.abortTransaction();
+        session.endSession();
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid seller ID'
+        });
+      }
+
+      // If dealerID is provided, validate dealer exists
+      if (dealerID && dealerID.trim() !== '') {
+        const dealer = await Dealer.findById(dealerID).session(session);
+        if (!dealer) {
+          await session.abortTransaction();
+          session.endSession();
+          return res.status(400).json({
+            success: false,
+            message: 'Invalid dealer ID'
+          });
+        }
+      }
+
+      // Update vehicle status to "Sold"
+      vehicle.status = 'Sold';
+      vehicle.updatedAt = new Date();
+      await vehicle.save({ session });
+
+      // Create carSell collection entry
+      const carSellData = {
+        vehicleId: vehicle._id,
+        amount,
+        sellerId,
+        dealerID: (dealerID && dealerID.trim() !== '') ? dealerID : '',
+        name,
+        email,
+        contact,
+        country: country || '',
+        createdAt: new Date()
+      };
+
+      await CarSell.create([carSellData], { session });
+
+      // Commit transaction
+      await session.commitTransaction();
+      session.endSession();
+
+      // Populate vehicle data for response
+      await vehicle.populate('postedBy', 'fullName email');
+
+      res.status(200).json({
+        success: true,
+        message: 'Vehicle marked as sold successfully',
+        data: vehicle
+      });
+    } catch (error) {
+      await session.abortTransaction();
+      session.endSession();
+      console.error('Error marking vehicle as sold:', error);
+      res.status(500).json({
+        success: false,
+        message: (error as Error).message || 'Internal server error'
+      });
     }
   },
 };

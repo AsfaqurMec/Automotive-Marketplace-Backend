@@ -23,7 +23,9 @@ const accessRoleSchema = new mongoose.Schema({
       subscriptionmanage:Boolean,
       ads:Boolean,
       hotproducts:Boolean,
-      planbilling:Boolean
+      planbilling:Boolean,
+      dealerRequests:Boolean,
+      carSold:Boolean,
     },
     car: {
       view: Boolean,
@@ -61,6 +63,12 @@ const accessRoleSchema = new mongoose.Schema({
     },
     settings: {
       update: Boolean,
+    },
+    carSold: {
+      view: Boolean,
+      create: Boolean,
+      edit: Boolean,
+      delete: Boolean,
     },
     adminPanel: {
     access: Boolean,

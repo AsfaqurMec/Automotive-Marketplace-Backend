@@ -9,6 +9,12 @@ vehicaleRoute.get("/get-vehicales", vehicaleController.getVehicales as (req: Req
 vehicaleRoute.get("/get-public-vehicles", vehicaleController.getPublicVehicales as (req: Request, res: Response, next: NextFunction) => void);
 vehicaleRoute.get("/get-dealer-vehicales", vehicaleController.getShareVehicales as (req: Request, res: Response, next: NextFunction) => void);
 
+// Update vehicle status - must be before /:id route
+vehicaleRoute.patch("/:id/status", vehicaleController.updateVehicleStatus as (req: Request, res: Response, next: NextFunction) => void);
+
+// Mark vehicle as sold - must be before /:id route
+vehicaleRoute.post("/:id/sold", vehicaleController.markVehicleAsSold as (req: Request, res: Response, next: NextFunction) => void);
+
 vehicaleRoute.get("/:id", vehicaleController.getVehicaleById as (req: Request, res: Response, next: NextFunction) => void);
 vehicaleRoute.get("/:slug", vehicaleController.getVehicaleBySlug as (req: Request, res: Response, next: NextFunction) => void);
 

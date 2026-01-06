@@ -177,6 +177,32 @@ export const sendDealerAccountMail = async({ fullName, email, password, link, ln
    }
 };
 
+export const sendDealerApplicationReceivedMail = async ({
+  to,
+  fullName,
+  subject,
+}: EmailOptions): Promise<void> => {
+  if (!to) {
+    return;
+  }
+
+  const greetingName = fullName || 'Dealer';
+  const reviewMessage = `
+    <h2>Thank you, ${greetingName}!</h2>
+    <p>Thank you for choosing NextDeal and submitting your dealer application.</p>
+    <p>We have received your request along with the supporting documents. Our onboarding team will review everything shortly.</p>
+    <p>Once the review is complete, we will reach out to you with the next steps.</p>
+    <p>If you have any questions in the meantime, feel free to reply to this email.</p>
+    <p>We look forward to partnering with you.</p>
+  `;
+
+  await sendHtmlMail({
+    to,
+    subject: subject || 'NextDeal Dealer Application Received',
+    html: baseTemplate(reviewMessage),
+  });
+};
+
 
 
 export const sendPublicEmail = (options: EmailOptions): Promise<unknown> =>
@@ -490,4 +516,33 @@ export const sendNewCustomerMail = async({ fullName, email, password, link, lng 
     });
   }
 };
+
+export const sendDealerAccountActivationMail = async ({
+  to,
+  fullName,
+  link,
+  lng = 'en',
+}: EmailOptions): Promise<void> => {
+  if (!to) {
+    return;
+  }
+
+  const greetingName = fullName || 'Dealer';
+  const content = `
+    <h2>Congratulations, ${greetingName}!</h2>
+    <p>Great news! Your dealer account has been activated.</p>
+    <p>Your application has been reviewed and approved by our team. You can now log in to your account and start using all the features available to dealers.</p>
+    <p>We're excited to have you as part of the NextDeal community!</p>
+    <a href="${link || `${WEBSITE_LINK}/signin`}" class="button">Login to Your Account</a>
+    <p style="margin-top: 30px;">If you have any questions, feel free to reach out to our support team.</p>
+    <p>${i18next.t("goodbye-message", { lng })}</p>
+  `;
+
+  await sendHtmlMail({
+    to,
+    subject: 'Your NextDeal Dealer Account Has Been Activated',
+    html: baseTemplate(content),
+  });
+};
+
 export default transport;

@@ -9,6 +9,7 @@ import {
   sendEmailVerifcationMail,
   sendNewAccountMail,
   sendPasswordResetMail,
+  sendDealerApplicationReceivedMail,
 } from '../services/transport.js';
 import * as yup from 'yup';
 import bcrypt from 'bcrypt';
@@ -25,8 +26,23 @@ import DealerAIChat from '../models/DealerAIChat.js';
 import upload from '../middleware/upload.js';
 // Updated to use Cloudinary instead of Google Cloud Storage
 import uploadFileToGCS from '../utils/googleCloud.js';
+import DealerRequest from '../models/DealerRequest.js';
 
 const cookieVariable='nextdeal-token'
+
+const registerDocumentFields: Array<{ name: string; maxCount: number }> = [
+  { name: 'tradeLicense', maxCount: 1 },
+  { name: 'tinCertificate', maxCount: 1 },
+  { name: 'vatRegistration', maxCount: 1 },
+  { name: 'companyProof', maxCount: 1 },
+  { name: 'ownershipProof', maxCount: 1 },
+  { name: 'ownerIdDocument', maxCount: 1 },
+  { name: 'ownerPhoto', maxCount: 1 },
+  { name: 'bankStatement', maxCount: 1 },
+  { name: 'brtaRegistration', maxCount: 1 },
+  { name: 'importLicense', maxCount: 1 },
+  { name: 'authorizationLetter', maxCount: 1 },
+];
  
 function getAuthCookieConfig(extra = {}) {
   const isProd = process.env.NODE_ENV === 'production';
@@ -126,6 +142,10 @@ authRouter.post('/login', async (req, res) => {
     if (!bcrypt.compareSync(data.password, user.password)) {
       throw UnauthorizedException(req.t('incorrect-password'));
     }
+
+    // if ((user as { status?: string })?.status === 'inactive') {
+    //   return res.status(403).json({ message: req.t ? req.t('dealer-account-inactive') : 'Dealer account is inactive' });
+    // }
      
     const payload = {
       email: user.email,
@@ -146,111 +166,190 @@ authRouter.post('/login', async (req, res) => {
      
  
   } catch (e: unknown) {
-    
+    console.log(e,"e");
     res.status(getErrorStatus(e as AppError)).json({ message: getErrorMessage(e as AppError), errorCode: e instanceof HttpException ? (e as HttpException).errorCode : undefined });
   }
 });
 
  
 
-authRouter.post('/register', async (req, res) => {
-  const registerSchema = yup.object({
-    firstName: yup
-      .string()
-      .min(2, req.t('first-name-too-short'))
-      .required(req.t('first-name-is-required')),
-    lastName: yup
-      .string()
-      .min(2, req.t('last-name-too-short'))
-      .required(req.t('last-name-is-required')),
-    fullName: yup
-      .string()
-      .min(1, req.t('username-too-short-enter-at-least-1-character'))
-      .required(req.t('username-is-required')),
-    email: yup
-      .string()
-      .email(req.t('enter-a-valid-email'))
-      .required(req.t('email-is-required')),
-    password: yup
-      .string()
-      .min(8, req.t('password-too-short-enter-at-least-8-characters'))
-      .required(req.t('password-is-required')),
-  });
-  
+authRouter.post(
+  '/register',
+  upload.fields(registerDocumentFields),
+  async (req, res) => {
+    console.log('req.body:', req.body);
+    console.log('req.files:', req.files);
 
-  try {
-    const type=req.body?.type  
-    let user
-     const data = await registerSchema.validate(
-      {
-        ...req.body,
-        fullName: `${req.body.firstName?.trim() || ''} ${req.body.lastName?.trim() || ''}`.trim(),
-      },
-      {
-        abortEarly: true,
-        stripUnknown: true,
-      }
-    );
-    
-    if(type =='customer'){
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-   
-     user = await Customer.create({
-        ...data,
-        password:hashedPassword
-      
-      });
-
-  
-    }else if(type=='dealer'){
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-     user = await Dealer.create({
-        ...data,
-        password:hashedPassword
-      
-      });
-    const newAiChat = new DealerAIChat({
-        dealer: user._id,
-       });
-    await newAiChat.save();
-      }else{
-      return res.json({message:'Type is Required'})
-    }
-
-   
-    const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET as string);
-
-    
-    try {
-      await sendEmailVerifcationMail({
-        link: `${process.env.BACKEND_URL}/auth/email-verification?token=${token}`,
-        to: user.email,
-        fullName: user.fullName,
-        lng: req.i18n.language as string,
-        subject: "Verify your email",
-      });
-    } catch {
-      
-      return res.status(201).json({ 
-        message: req.t('user-registered-but-failed-to-send-verification-email'),
-        user: { ...user.toObject(), password: undefined } 
-      });
-    }
-
- 
-     res.status(201).json({ 
-      message: req.t('user-registered-successfully'),
-      user: { ...user.toObject(), password: undefined } 
+    const registerSchema = yup.object({
+      type: yup
+        .string()
+        .oneOf(['customer', 'dealer'])
+        .required(req.t('type-is-required')),
+      firstName: yup
+        .string()
+        .min(2, req.t('first-name-too-short'))
+        .required(req.t('first-name-is-required')),
+      lastName: yup
+        .string()
+        .min(2, req.t('last-name-too-short'))
+        .required(req.t('last-name-is-required')),
+      fullName: yup
+        .string()
+        .min(1, req.t('username-too-short-enter-at-least-1-character'))
+        .required(req.t('username-is-required')),
+      email: yup
+        .string()
+        .email(req.t('enter-a-valid-email'))
+        .required(req.t('email-is-required')),
+      password: yup
+        .string()
+        .min(8, req.t('password-too-short-enter-at-least-8-characters'))
+        .required(req.t('password-is-required')),
+      bankAccountInfo: yup
+        .string()
+        .when('type', {
+          is: 'dealer',
+          then: (schema) => schema.required(req.t('bank-account-info-is-required')),
+          otherwise: (schema) => schema.strip(),
+        }),
+      status: yup
+        .string()
+        .oneOf(['active', 'inactive'])
+        .default('inactive')
+        .when('type', {
+          is: 'dealer',
+          then: (schema) => schema.default('inactive'),
+          otherwise: (schema) => schema.strip(),
+        }),
     });
 
-  } catch (e: unknown) { 
-   if ((e as { code?: number }).code === 11000) {
-      res.status(400).json({ message: req.t('username-or-email-already-exists') });
-    } else {
-      res.status((e as { status?: number }).status || 400).json({ message: (e as Error).message });
+    try {
+      let user;
+
+      const data = await registerSchema.validate(
+        {
+          ...req.body,
+          fullName: `${req.body.firstName?.trim() || ''} ${req.body.lastName?.trim() || ''}`.trim(),
+        },
+        {
+          abortEarly: true,
+          stripUnknown: true,
+        }
+      );
+      const { type, bankAccountInfo, status = 'inactive', ...userData } = data;
+
+      if (type === 'customer') {
+        const hashedPassword = await bcrypt.hash(userData.password, 10);
+        user = await Customer.create({
+          ...userData,
+          password: hashedPassword,
+        });
+      } else if (type === 'dealer') {
+        const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+        const filesRecord = !Array.isArray(req.files)
+          ? (req.files as Record<string, Express.Multer.File[]> | undefined)
+          : undefined;
+
+        const documents = filesRecord
+          ? Object.keys(filesRecord).reduce<Record<string, unknown>>((acc, key) => {
+              const file = filesRecord[key]?.[0] as (Express.Multer.File & { path?: string; filename?: string }) | undefined;
+              if (file) {
+                acc[key] = {
+                  url: file.path,
+                  filename: file.originalname,
+                  mimetype: file.mimetype,
+                  size: file.size,
+                  publicId: (file as unknown as { filename?: string }).filename,
+                  uploadedAt: new Date(),
+                };
+              }
+              return acc;
+            }, {})
+          : {};
+
+        const dealerData = {
+          ...userData,
+          password: hashedPassword,
+          status,
+          // bankAccountInfo,
+          // documents,
+        };
+
+        user = await Dealer.create(dealerData);
+
+        const newAiChat = new DealerAIChat({
+          dealer: user._id,
+        });
+        await newAiChat.save();
+
+        try {
+          const requestPayload = {
+            dealer: user._id,
+            data: {
+              ...userData,
+              bankAccountInfo,
+              status,
+              type,
+            },
+            documents: Object.entries(documents).map(([key, value]) => ({
+              key,
+              ...(value as Record<string, unknown>),
+            })),
+          };
+
+          await DealerRequest.create(requestPayload);
+        } catch (requestError) {
+          console.error('Failed to create dealer request record:', requestError);
+        }
+
+        try {
+          await sendDealerApplicationReceivedMail({
+            to: user.email,
+            fullName: user.fullName,
+            subject: 'We received your dealer application',
+          });
+        } catch (mailError) {
+          console.error('Dealer application acknowledgement email failed:', mailError);
+        }
+      } else {
+        return res.status(400).json({ message: 'Type is Required' });
+      }
+
+      const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET as string);
+
+      try {
+        await sendEmailVerifcationMail({
+          link: `${process.env.BACKEND_URL}/auth/email-verification?token=${token}`,
+          to: user.email,
+          fullName: user.fullName,
+          lng: req.i18n.language as string,
+          subject: 'Verify your email',
+        });
+      } catch (error) {
+        console.error('Email verification error:', error);
+        return res.status(201).json({
+          message: req.t('user-registered-but-failed-to-send-verification-email'),
+          user: { ...user.toObject(), password: undefined },
+        });
+      }
+
+      return res.status(201).json({
+        message: req.t('user-registered-successfully'),
+        user: { ...user.toObject(), password: undefined },
+      });
+    } catch (e: unknown) {
+      console.log(e,"e");
+      if ((e as { code?: number }).code === 11000) {
+        res.status(400).json({ message: req.t('username-or-email-already-exists') });
+      } else {
+        res
+          .status((e as { status?: number }).status || 400)
+          .json({ message: (e as Error).message });
+      }
     }
   }
-});  
+);  
  
 authRouter.get('/email-verification', async (req, res) => {
   try {

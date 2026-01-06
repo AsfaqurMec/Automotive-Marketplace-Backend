@@ -13,6 +13,9 @@ import campaignRouter from './admin/campaign.js';
 import subscriptionRouter from './admin/subscription.js';
 import authenticateUser from '../middleware/authMiddleware.js';
 import path from 'path';
+import dealerRequestRouter from './admin/dealerRequest.js';
+import paymentRouter from './payment.js';
+import carSellRouter from './carSell.js';
 
 const router = express.Router();
 
@@ -33,6 +36,10 @@ router.use('/chats', chatRoute);
 router.use('/messages', messageRoute);
 router.use('/campaign', authenticateUser, campaignRouter);
 router.use('/subscription', authenticateUser, subscriptionRouter);
+router.use('/dealer-requests', authenticateUser, dealerRequestRouter);
+router.use('/payment', paymentRouter);
+router.use('/catSell', authenticateUser, carSellRouter);
+
 
 export default router;
 

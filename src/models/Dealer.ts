@@ -34,6 +34,10 @@ const dealerSchema = new mongoose.Schema({
     type: String,
     default: '', 
   },
+  documents: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
+  },
 
   businessLicenseNumber: String,
   licenseDocument: String,
@@ -60,6 +64,14 @@ const dealerSchema = new mongoose.Schema({
   isBlocked: {
     type: Boolean,
     default: false,
+  },
+  status: {
+    type: String,
+    enum: ['active', 'inactive'],
+    default: 'inactive',
+  },
+  bankAccountInfo: {
+    type: String,
   },
 
   lastLogin: Date,
