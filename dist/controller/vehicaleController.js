@@ -182,7 +182,7 @@ const vehicaleController = {
         }
     },
     async createVehicale(req, res) {
-        console.log('createVehicale');
+      //  console.log('createVehicale');
         try {
             if (typeof req.body.location === 'string') {
                 req.body.location = JSON.parse(req.body.location);

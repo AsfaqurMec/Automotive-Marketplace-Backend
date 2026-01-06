@@ -177,8 +177,8 @@ authRouter.post(
   '/register',
   upload.fields(registerDocumentFields),
   async (req, res) => {
-    console.log('req.body:', req.body);
-    console.log('req.files:', req.files);
+   // console.log('req.body:', req.body);
+   // console.log('req.files:', req.files);
 
     const registerSchema = yup.object({
       type: yup

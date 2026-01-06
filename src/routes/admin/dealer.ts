@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import Dealer from "../../models/Dealer.js";
 import Customer from '../../models/Customer.js';
 import Car from '../../models/Car.js';
@@ -39,24 +40,25 @@ dealerRoute.get('/dashboard/summary', async (req, res) => {
     if (userId) {
       // Check if user is admin or dealer
       const user = 
-        (await Customer.findById(userId).populate('role')) ||
+        // (await Customer.findById(userId).populate('role')) ||
         (await Dealer.findById(userId).populate('role'));
-      
+   //   console.log(user);
       if (user && user.role) {
         const userRole = user.role as unknown as { roleId?: string };
         if (userRole.roleId === 'admin' || userRole.roleId === 'superAdmin') {
           isAdmin = true;
         } else {
           // If dealer, filter by their ID
-          dealerFilter = { postedBy: userId };
+          dealerFilter = { postedBy: new mongoose.Types.ObjectId(userId) };
+        //  console.log("dealerFilter",dealerFilter);
         }
       }
     }
     
     // Build base filters
     const carFilter = isAdmin ? {} : dealerFilter;
-    const carSellFilter = isAdmin ? {} : { sellerId: userId };
-    const leadFilter = isAdmin ? {} : { assignedTo: userId };
+    const carSellFilter = isAdmin ? {} : { sellerId: new mongoose.Types.ObjectId(userId) };
+    const leadFilter = isAdmin ? {} : (userId ? { assignedTo: userId } : {});
     
     // Get basic counts
     const totalDealer = isAdmin 
@@ -80,7 +82,7 @@ dealerRoute.get('/dashboard/summary', async (req, res) => {
     brandAggregation.forEach((item) => {
       carBrands[item._id] = item.count;
     });
-    
+   // console.log("carBrands",carBrands);
     // Get car status counts
     const statusAggregation = await Car.aggregate([
       { $match: carFilter },
