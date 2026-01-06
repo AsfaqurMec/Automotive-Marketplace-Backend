@@ -125,9 +125,16 @@ const carSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
   });
 carSchema.pre("save", async function (next) {
- 
+  // Update updatedAt on any modification (except initial creation)
+  if (!this.isNew) {
+    this.updatedAt = new Date();
+  }
 
   if (!this.isModified("title") && this.slug) {
     return next();

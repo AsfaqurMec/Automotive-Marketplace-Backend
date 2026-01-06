@@ -10,6 +10,7 @@ interface CarSellQueryParams {
   page?: string;
   limit?: string;
   search?: string;
+  [key: string]: string | undefined;
 }
 
 interface CarSellRequest extends AuthenticatedRequest {
