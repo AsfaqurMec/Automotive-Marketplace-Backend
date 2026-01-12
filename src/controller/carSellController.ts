@@ -30,7 +30,7 @@ const carSellController = {
 
       // Fetch user from database and populate role
       const user = 
-        (await Customer.findById(req.user._id).populate('role')) ||
+        // (await Customer.findById(req.user._id).populate('role')) ||
         (await Dealer.findById(req.user._id).populate('role'));
 
       if (!user) {
@@ -49,10 +49,10 @@ const carSellController = {
         });
       }
 
-      if (userRole.roleId !== 'admin' && userRole.roleId !== 'superAdmin') {
+      if (userRole.roleId !== 'admin' && userRole.roleId !== 'superAdmin' && userRole.roleId !== 'dealer') {
         return res.status(403).json({
           success: false,
-          message: 'Unauthorized: Admin access required'
+          message: 'Unauthorized: Dealer access required'
         });
       }
 

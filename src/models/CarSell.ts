@@ -45,3 +45,4 @@ const carSellSchema = new mongoose.Schema({
 
 export default mongoose.model("CarSell", carSellSchema);
 
+

@@ -143,9 +143,10 @@ authRouter.post('/login', async (req, res) => {
       throw UnauthorizedException(req.t('incorrect-password'));
     }
 
-    // if ((user as { status?: string })?.status === 'inactive') {
-    //   return res.status(403).json({ message: req.t ? req.t('dealer-account-inactive') : 'Dealer account is inactive' });
-    // }
+    // Check if dealer status is inactive
+    if ((user as { status?: string })?.status === 'inactive') {
+      return res.status(403).json({ message: req.t('dealer-account-inactive') });
+    }
      
     const payload = {
       email: user.email,
