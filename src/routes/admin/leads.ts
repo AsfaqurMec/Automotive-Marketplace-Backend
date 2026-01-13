@@ -427,13 +427,27 @@ leadsRoute.post('/create', async (req, res) => {
   try {
     const data = await createLeadSchema.validate(req.body, { abortEarly: false, stripUnknown: true });
     const lead = new Lead(data);
+    console.log('lead', lead);
     await lead.save();
-    // Notify assigned dealers (if any)
+    // Notify assigned dealers (if any) or all dealers except creator
     try {
-      const assigned = Array.isArray(lead.assignedTo) ? lead.assignedTo : [];
-      if (assigned.length > 0) {
-        const dealers = await Dealer.find({ _id: { $in: assigned } }).select('fullName companyName email');
-        const link = `${process.env.WEBSITE_LINK}/admin/leads`;
+      const link = `${process.env.WEBSITE_LINK}/admin/leads`;
+      let dealers;
+
+      if (lead.assignedTo && lead.assignedTo.trim() !== '') {
+        // If assignedTo has an ID, send email to that specific dealer
+        const assignedDealer = await Dealer.findById(lead.assignedTo).select('fullName companyName email');
+        dealers = assignedDealer ? [assignedDealer] : [];
+      } else {
+        // If assignedTo is null or empty, send email to all dealers except the creator
+        const filter: Record<string, unknown> = {};
+        if (lead.createdBy && lead.createdBy.trim() !== '') {
+          filter._id = { $ne: lead.createdBy };
+        }
+        dealers = await Dealer.find(filter).select('fullName companyName email');
+      }
+
+      if (dealers.length > 0) {
         await Promise.all(
           dealers
             .filter(d => d.email)
