@@ -113,6 +113,12 @@ const carSchema = new mongoose.Schema({
 
   contactPhone: { type: String },
   contactEmail: { type: String },
+  
+  contactInfo: {
+    name: { type: String },
+    phone: { type: String },
+    email: { type: String },
+  },
 
   views: {
     type: Number,

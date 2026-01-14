@@ -220,7 +220,7 @@ const vehicaleController = {
   },
 
   async createVehicale(req: AuthenticatedVehicleRequest, res: Response) {
-    console.log('createVehicale');
+    console.log('createVehicale', req.body);
     try {
       if (typeof req.body.location === 'string') {
         req.body.location = JSON.parse(req.body.location);
@@ -236,6 +236,10 @@ const vehicaleController = {
 
       if (typeof req.body.features === 'string') {
         req.body.features = JSON.parse(req.body.features);
+      }
+
+      if (typeof req.body.contactInfo === 'string') {
+        req.body.contactInfo = JSON.parse(req.body.contactInfo);
       }
 
       if (req.body.views) {
@@ -362,6 +366,10 @@ const vehicaleController = {
 
       if (typeof req.body.documents === 'string') {
         req.body.documents = JSON.parse(req.body.documents);
+      }
+
+      if (typeof req.body.contactInfo === 'string') {
+        req.body.contactInfo = JSON.parse(req.body.contactInfo);
       }
 
       // Handle features array - could be string, array, or object with keys like 'features[]'

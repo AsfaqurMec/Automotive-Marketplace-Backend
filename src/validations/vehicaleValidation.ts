@@ -53,5 +53,12 @@ export const vehicaleSchema = yup.object().shape({
    
   contactPhone: yup.string().nullable(),
   contactEmail: yup.string().email().nullable(),
+  
+  contactInfo: yup.object({
+    name: yup.string().nullable(),
+    phone: yup.string().nullable(),
+    email: yup.string().email().nullable(),
+  }).nullable(),
+  
   views: yup.number(),
 })
